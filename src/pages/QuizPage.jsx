@@ -24,44 +24,66 @@ function formatTime(seconds) {
 
 export default function QuizPage() {
   const navigate = useNavigate()
-  const [session, setSession] = useState(null)
-  const [allQuestions, setAllQuestions] = useState([])
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [answers, setAnswers] = useState({})
-  const [submitting, setSubmitting] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(null)
   const cardRef = useRef(null)
   const submitRef = useRef(false) // double-submit guard
   const tokenMarked = useRef(false) // guard: mark used only once
 
-  useEffect(() => {
-    const data = sessionStorage.getItem('mentora_session')
-    if (!data) { navigate('/invalid', { replace: true }); return }
-    const sess = JSON.parse(data)
-    setSession(sess)
+  // Read session synchronously — same pattern as TermsPage
+  const [session] = useState(() => {
+    try {
+      const data = sessionStorage.getItem('mentora_session')
+      return data ? JSON.parse(data) : null
+    } catch {
+      return null
+    }
+  })
 
-    // Flatten all questions with section info
-    const test = TESTS[sess.testType]
-    if (!test) { navigate('/invalid', { replace: true }); return }
-
-    const flat = []
-    test.sections.forEach(section => {
-      section.questions.forEach(q => {
-        flat.push({ ...q, sectionId: section.id, sectionTitle: section.title, sectionInstruction: section.instruction })
+  // Flatten questions synchronously from session
+  const [allQuestions] = useState(() => {
+    try {
+      const data = sessionStorage.getItem('mentora_session')
+      if (!data) return []
+      const sess = JSON.parse(data)
+      const test = TESTS[sess.testType]
+      if (!test) return []
+      const flat = []
+      test.sections.forEach(section => {
+        section.questions.forEach(q => {
+          flat.push({ ...q, sectionId: section.id, sectionTitle: section.title, sectionInstruction: section.instruction })
+        })
       })
-    })
-    setAllQuestions(flat)
+      return flat
+    } catch {
+      return []
+    }
+  })
 
-    // Timer set karo
-    const duration = (TEST_DURATION[sess.testType] || 40) * 60
-    setTimeLeft(duration)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [answers, setAnswers] = useState({})
+  const [submitting, setSubmitting] = useState(false)
+  const [timeLeft, setTimeLeft] = useState(() => {
+    try {
+      const data = sessionStorage.getItem('mentora_session')
+      if (!data) return null
+      const sess = JSON.parse(data)
+      return (TEST_DURATION[sess.testType] || 40) * 60
+    } catch {
+      return null
+    }
+  })
 
-    // Mark token used only once — deferred so it doesn't race with page load
+  useEffect(() => {
+    // Redirect if no valid session
+    if (!session || allQuestions.length === 0) {
+      navigate('/invalid', { replace: true })
+      return
+    }
+    // Mark token used once — fires after first real mount
     if (!tokenMarked.current) {
       tokenMarked.current = true
-      markTokenUsed(sess.orderId)
+      markTokenUsed(session.orderId)
     }
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Timer countdown
   useEffect(() => {

@@ -6,11 +6,10 @@ import './VerifyPage.css'
 export default function VerifyPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const [status, setStatus] = useState('loading') // loading | error
-  const hasRun = useRef(false) // guard against StrictMode double-invoke
+  const hasRun = useRef(false)
 
   useEffect(() => {
-    // Prevent double execution (React StrictMode / re-renders)
+    // StrictMode double-invoke guard
     if (hasRun.current) return
     hasRun.current = true
 
@@ -22,12 +21,28 @@ export default function VerifyPage() {
       return
     }
 
+    // ── KEY FIX ──────────────────────────────────────────────────────────────
+    // If a valid session for this exact token already exists in sessionStorage,
+    // skip the API call entirely and go straight to /terms.
+    // This handles the case where VerifyPage remounts (StrictMode, Vercel
+    // redirect, browser back) after the session was already written.
+    try {
+      const existing = JSON.parse(sessionStorage.getItem('mentora_session') || 'null')
+      if (existing && existing.token === token && existing.testType === type) {
+        navigate('/terms', { replace: true })
+        return
+      }
+    } catch {
+      // corrupt data — fall through to fresh verify
+      sessionStorage.removeItem('mentora_session')
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     async function verify() {
       try {
         const result = await verifyToken(token, type)
 
         if (result.valid) {
-          // Write session BEFORE navigating — synchronous, so TermsPage will always find it
           sessionStorage.setItem('mentora_session', JSON.stringify({
             orderId: result.orderId,
             customerName: result.customerName,

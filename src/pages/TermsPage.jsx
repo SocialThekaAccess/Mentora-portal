@@ -1,41 +1,32 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TESTS, TEST_LABELS } from '../data/testsData'
 import './TermsPage.css'
 
 export default function TermsPage() {
   const navigate = useNavigate()
-  const [session, setSession] = useState(null)
   const [checked, setChecked] = useState({ c1: false, c2: false, c3: false })
-  const [sessionReady, setSessionReady] = useState(false)
 
-  useEffect(() => {
-    // Small defer to ensure sessionStorage write from VerifyPage has settled
-    // before we attempt to read it (handles any micro-task ordering edge cases)
-    const timer = setTimeout(() => {
+  // Read sessionStorage synchronously during render so session is available
+  // immediately on first render — no useEffect delay, no StrictMode issues.
+  const [session] = useState(() => {
+    try {
       const data = sessionStorage.getItem('mentora_session')
-      if (!data) {
-        navigate('/invalid', { replace: true })
-        return
-      }
-      try {
-        setSession(JSON.parse(data))
-      } catch {
-        navigate('/invalid', { replace: true })
-      } finally {
-        setSessionReady(true)
-      }
-    }, 0)
+      return data ? JSON.parse(data) : null
+    } catch {
+      return null
+    }
+  })
 
-    return () => clearTimeout(timer)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Show nothing until session check completes — prevents flash to /invalid
-  if (!sessionReady || !session) return null
+  if (!session) {
+    // No valid session — redirect to invalid page
+    // Using navigate inside render is safe here since session never changes
+    navigate('/invalid', { replace: true })
+    return null
+  }
 
   const test = TESTS[session.testType]
   const allChecked = Object.values(checked).every(Boolean)
-
   const totalQ = test?.sections?.reduce((sum, s) => sum + s.questions.length, 0) || 0
 
   return (
