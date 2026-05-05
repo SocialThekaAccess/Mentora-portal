@@ -32,6 +32,7 @@ export default function QuizPage() {
   const [timeLeft, setTimeLeft] = useState(null)
   const cardRef = useRef(null)
   const submitRef = useRef(false) // double-submit guard
+  const tokenMarked = useRef(false) // guard: mark used only once
 
   useEffect(() => {
     const data = sessionStorage.getItem('mentora_session')
@@ -55,8 +56,11 @@ export default function QuizPage() {
     const duration = (TEST_DURATION[sess.testType] || 40) * 60
     setTimeLeft(duration)
 
-    // Test shuru hote hi token mark karo — yahan se wapas nahi ja sakte
-    markTokenUsed(sess.orderId)
+    // Mark token used only once — deferred so it doesn't race with page load
+    if (!tokenMarked.current) {
+      tokenMarked.current = true
+      markTokenUsed(sess.orderId)
+    }
   }, [])
 
   // Timer countdown

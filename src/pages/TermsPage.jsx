@@ -7,17 +7,31 @@ export default function TermsPage() {
   const navigate = useNavigate()
   const [session, setSession] = useState(null)
   const [checked, setChecked] = useState({ c1: false, c2: false, c3: false })
+  const [sessionReady, setSessionReady] = useState(false)
 
   useEffect(() => {
-    const data = sessionStorage.getItem('mentora_session')
-    if (!data) {
-      navigate('/invalid', { replace: true })
-      return
-    }
-    setSession(JSON.parse(data))
-  }, [])
+    // Small defer to ensure sessionStorage write from VerifyPage has settled
+    // before we attempt to read it (handles any micro-task ordering edge cases)
+    const timer = setTimeout(() => {
+      const data = sessionStorage.getItem('mentora_session')
+      if (!data) {
+        navigate('/invalid', { replace: true })
+        return
+      }
+      try {
+        setSession(JSON.parse(data))
+      } catch {
+        navigate('/invalid', { replace: true })
+      } finally {
+        setSessionReady(true)
+      }
+    }, 0)
 
-  if (!session) return null
+    return () => clearTimeout(timer)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Show nothing until session check completes — prevents flash to /invalid
+  if (!sessionReady || !session) return null
 
   const test = TESTS[session.testType]
   const allChecked = Object.values(checked).every(Boolean)
