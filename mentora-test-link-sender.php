@@ -12,40 +12,9 @@ if (!defined('ABSPATH')) exit;
 // CONSTANTS
 // =============================================
 define('MENTORA_ADMIN_EMAIL', 'support@mentorabridge.com');
-define('MENTORA_FROM_EMAIL',  'admin@mentorabridge.com'); // Gmail wala address yahan
+define('MENTORA_FROM_EMAIL',  'admin@mentorabridge.com');
 define('MENTORA_FROM_NAME',   'Mentora Bridge');
 define('MENTORA_PORTAL_URL',  'https://mentora-bridge.vercel.app');
-
-// =============================================
-// SMTP CONFIGURATION (Gmail App Password)
-// ─────────────────────────────────────────────
-// Setup steps:
-// 1. Google Account → Security → 2-Step Verification ON karo
-// 2. Google Account → Security → App Passwords
-// 3. "Mail" + "Other (Custom name)" select karo → "Mentora" naam do
-// 4. Jo 16-character password mile woh MENTORA_SMTP_PASS mein daalo
-// 5. MENTORA_SMTP_USER mein apna Gmail address daalo
-// =============================================
-define('MENTORA_SMTP_HOST', 'smtp.gmail.com');
-define('MENTORA_SMTP_PORT', 587);
-define('MENTORA_SMTP_USER', 'admin@mentorabridge.com'); // ← apna Gmail yahan
-define('MENTORA_SMTP_PASS', 'APNI_APP_PASSWORD_YAHAN'); // ← 16-char App Password yahan
-
-// =============================================
-// PHPMAILER SMTP OVERRIDE
-// WordPress ke default wp_mail ko SMTP se replace karo
-// =============================================
-add_action('phpmailer_init', function($phpmailer) {
-    $phpmailer->isSMTP();
-    $phpmailer->Host       = MENTORA_SMTP_HOST;
-    $phpmailer->SMTPAuth   = true;
-    $phpmailer->Port       = MENTORA_SMTP_PORT;
-    $phpmailer->Username   = MENTORA_SMTP_USER;
-    $phpmailer->Password   = MENTORA_SMTP_PASS;
-    $phpmailer->SMTPSecure = 'tls';
-    $phpmailer->From       = MENTORA_FROM_EMAIL;
-    $phpmailer->FromName   = MENTORA_FROM_NAME;
-});
 
 // =============================================
 // CORS — portal domain ko allow karo
