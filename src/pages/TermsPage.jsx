@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TESTS, TEST_LABELS } from '../data/testsData'
 import './TermsPage.css'
@@ -7,8 +7,6 @@ export default function TermsPage() {
   const navigate = useNavigate()
   const [checked, setChecked] = useState({ c1: false, c2: false, c3: false })
 
-  // Read sessionStorage synchronously during render so session is available
-  // immediately on first render — no useEffect delay, no StrictMode issues.
   const [session] = useState(() => {
     try {
       const data = sessionStorage.getItem('mentora_session')
@@ -18,12 +16,14 @@ export default function TermsPage() {
     }
   })
 
-  if (!session) {
-    // No valid session — redirect to invalid page
-    // Using navigate inside render is safe here since session never changes
-    navigate('/invalid', { replace: true })
-    return null
-  }
+  // navigate ko render ke andar call karna safe nahi — useEffect mein karo
+  useEffect(() => {
+    if (!session) {
+      navigate('/invalid', { replace: true })
+    }
+  }, [session, navigate])
+
+  if (!session) return null
 
   const test = TESTS[session.testType]
   const allChecked = Object.values(checked).every(Boolean)
@@ -32,7 +32,7 @@ export default function TermsPage() {
   return (
     <div className="terms-page">
       <div className="terms-container">
-        {/* Header */}
+
         <div className="terms-header">
           <div className="terms-logo">MB</div>
           <div>
@@ -41,13 +41,11 @@ export default function TermsPage() {
           </div>
         </div>
 
-        {/* Welcome */}
         <div className="terms-welcome">
           <h2>Welcome, {session.customerName}!</h2>
           <p>You are about to start the <strong>{test?.title}</strong> for <strong>{test?.subtitle}</strong>.</p>
         </div>
 
-        {/* Test Info */}
         <div className="terms-info-grid">
           <div className="info-card">
             <span className="info-icon">📝</span>
@@ -72,7 +70,6 @@ export default function TermsPage() {
           </div>
         </div>
 
-        {/* Instructions */}
         <div className="terms-instructions">
           <h3>Instructions</h3>
           <ul>
@@ -85,7 +82,6 @@ export default function TermsPage() {
           </ul>
         </div>
 
-        {/* Consent checkboxes */}
         <div className="terms-consent">
           <h3>Before you begin</h3>
           {[
@@ -104,7 +100,6 @@ export default function TermsPage() {
           ))}
         </div>
 
-        {/* Start Button */}
         <button
           className={`start-btn ${allChecked ? 'active' : ''}`}
           disabled={!allChecked}
@@ -112,6 +107,7 @@ export default function TermsPage() {
         >
           Start Test →
         </button>
+
       </div>
     </div>
   )

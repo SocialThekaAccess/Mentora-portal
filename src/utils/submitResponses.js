@@ -6,7 +6,7 @@ const WC_KEY = 'ck_832fc97f066f7be8bc313f180baf24b0458990fb'
 const WC_SECRET = 'cs_eb927979f0070a153d248a9646c5387ea278b7d1'
 
 // Admin email jahan results jaayenge
-const ADMIN_EMAIL = 'admin@mentorabridge.com'
+const ADMIN_EMAIL = 'support@mentorabridge.com'
 
 const DEV_MODE = false
 
