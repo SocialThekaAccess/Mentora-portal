@@ -39,23 +39,29 @@ export async function submitResponses({ orderId, customerName, customerEmail, te
 
   try {
     // 1. WooCommerce order mein save karo
-    await fetch(
-      `${WC_URL}/wp-json/wc/v3/orders/${orderId}?consumer_key=${WC_KEY}&consumer_secret=${WC_SECRET}`,
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          meta_data: [
-            { key: '_mentora_test_used', value: 'yes' },
-            { key: '_mentora_test_answers', value: answersText },
-            { key: '_mentora_test_submitted_at', value: submittedAt },
-          ],
-        }),
-      }
-    )
+    // Note: failure here should NOT block the email — separate try/catch
+    try {
+      await fetch(
+        `${WC_URL}/wp-json/wc/v3/orders/${orderId}?consumer_key=${WC_KEY}&consumer_secret=${WC_SECRET}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            meta_data: [
+              { key: '_mentora_test_used', value: 'yes' },
+              { key: '_mentora_test_answers', value: answersText },
+              { key: '_mentora_test_submitted_at', value: submittedAt },
+            ],
+          }),
+        }
+      )
+    } catch (wcErr) {
+      // WooCommerce save fail hone se email block nahi honi chahiye
+      console.warn('WooCommerce save failed (non-fatal):', wcErr)
+    }
 
-    // 2. Email bhejo WordPress hook se
-    await fetch(`${WC_URL}/wp-json/mentora/v1/send-results`, {
+    // 2. Email bhejo WordPress hook se — admin + student dono
+    const emailRes = await fetch(`${WC_URL}/wp-json/mentora/v1/send-results`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -69,7 +75,14 @@ export async function submitResponses({ orderId, customerName, customerEmail, te
       }),
     })
 
-    return { success: true }
+    if (!emailRes.ok) {
+      const errText = await emailRes.text()
+      console.error('send-results endpoint error:', emailRes.status, errText)
+      // Email fail hone ke bawajood success return karo — test data save ho gaya
+      return { success: true, emailSent: false }
+    }
+
+    return { success: true, emailSent: true }
   } catch (err) {
     console.error('Submit error:', err)
     return { success: false, error: err.message }
