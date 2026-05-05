@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { verifyToken } from '../utils/verifyToken'
 import './VerifyPage.css'
@@ -7,35 +7,46 @@ export default function VerifyPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const [status, setStatus] = useState('loading') // loading | error
+  const hasRun = useRef(false) // guard against StrictMode double-invoke
 
   useEffect(() => {
+    // Prevent double execution (React StrictMode / re-renders)
+    if (hasRun.current) return
+    hasRun.current = true
+
     const token = searchParams.get('token')
     const type = searchParams.get('type')
 
-    async function verify() {
-      const result = await verifyToken(token, type)
+    if (!token || !type) {
+      navigate('/invalid', { replace: true })
+      return
+    }
 
-      if (result.valid) {
-        // Session storage mein save karo — token abhi mark NAHI hoga
-        sessionStorage.setItem('mentora_session', JSON.stringify({
-          orderId: result.orderId,
-          customerName: result.customerName,
-          customerEmail: result.customerEmail,
-          testType: result.testType,
-          token,
-        }))
-        navigate('/terms', { replace: true })
-      } else {
-        navigate(`/${result.reason}`, { replace: true })
+    async function verify() {
+      try {
+        const result = await verifyToken(token, type)
+
+        if (result.valid) {
+          // Write session BEFORE navigating — synchronous, so TermsPage will always find it
+          sessionStorage.setItem('mentora_session', JSON.stringify({
+            orderId: result.orderId,
+            customerName: result.customerName,
+            customerEmail: result.customerEmail,
+            testType: result.testType,
+            token,
+          }))
+          navigate('/terms', { replace: true })
+        } else {
+          navigate(`/${result.reason}`, { replace: true })
+        }
+      } catch (err) {
+        console.error('Verify error:', err)
+        navigate('/invalid', { replace: true })
       }
     }
 
-    if (!token || !type) {
-      navigate('/invalid', { replace: true })
-    } else {
-      verify()
-    }
-  }, [])
+    verify()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="verify-screen">
