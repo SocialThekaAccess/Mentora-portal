@@ -61,30 +61,36 @@ export async function submitResponses({ orderId, customerName, customerEmail, te
     }
 
     // 2. Email bhejo WordPress hook se — admin + student dono
-    const emailRes = await fetch(`${WC_URL}/wp-json/mentora/v1/send-results`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        orderId,
-        customerName,
-        customerEmail,
-        adminEmail: ADMIN_EMAIL,
-        testType,
-        answers: answersText,
-        submittedAt,
-      }),
-    })
+    try {
+      const emailRes = await fetch(`${WC_URL}/wp-json/mentora/v1/send-results`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId,
+          customerName,
+          customerEmail,
+          adminEmail: ADMIN_EMAIL,
+          testType,
+          answers: answersText,
+          submittedAt,
+        }),
+      })
 
-    if (!emailRes.ok) {
-      const errText = await emailRes.text()
-      console.error('send-results endpoint error:', emailRes.status, errText)
-      // Email fail hone ke bawajood success return karo — test data save ho gaya
-      return { success: true, emailSent: false }
+      if (!emailRes.ok) {
+        const errText = await emailRes.text()
+        console.error('send-results endpoint error:', emailRes.status, errText)
+      }
+    } catch (emailErr) {
+      // Email fail hone se student ko error mat dikhao
+      // Answers WooCommerce mein save ho chuke hain
+      console.error('Email send failed (non-fatal):', emailErr)
     }
 
-    return { success: true, emailSent: true }
+    // Hamesha success return karo — answers save ho gaye
+    return { success: true }
   } catch (err) {
     console.error('Submit error:', err)
+    // Agar WooCommerce save bhi fail hua toh hi false return karo
     return { success: false, error: err.message }
   }
 }

@@ -29,10 +29,26 @@ add_action('rest_api_init', function() {
         header("Access-Control-Allow-Origin: $origin");
         header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
         header("Access-Control-Allow-Headers: Authorization, Content-Type");
+        header("Access-Control-Allow-Credentials: true");
     }
+}, 1);
+
+// OPTIONS preflight request — alag hook se handle karo
+add_action('init', function() {
     if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
-        status_header(200);
-        exit();
+        $allowed_origins = [
+            'https://mentorabridgepsychometric.com',
+            'https://mentora-bridge.vercel.app',
+        ];
+        $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+        if (in_array($origin, $allowed_origins)) {
+            header("Access-Control-Allow-Origin: $origin");
+            header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
+            header("Access-Control-Allow-Headers: Authorization, Content-Type");
+            header("Access-Control-Allow-Credentials: true");
+            status_header(200);
+            exit();
+        }
     }
 }, 1);
 
