@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mentora Bridge Test Link Sender
  * Description: WooCommerce order complete hone par test link email karta hai + results email karta hai
- * Version: 2.0
+ * Version: 3.0
  * Author: Mentora Bridge
  */
 
@@ -12,9 +12,40 @@ if (!defined('ABSPATH')) exit;
 // CONSTANTS
 // =============================================
 define('MENTORA_ADMIN_EMAIL', 'admin@mentorabridge.com');
-define('MENTORA_FROM_EMAIL',  'noreply@mentorabridge.com');
+define('MENTORA_FROM_EMAIL',  'admin@mentorabridge.com'); // Gmail wala address yahan
 define('MENTORA_FROM_NAME',   'Mentora Bridge');
 define('MENTORA_PORTAL_URL',  'https://mentora-bridge.vercel.app');
+
+// =============================================
+// SMTP CONFIGURATION (Gmail App Password)
+// ─────────────────────────────────────────────
+// Setup steps:
+// 1. Google Account → Security → 2-Step Verification ON karo
+// 2. Google Account → Security → App Passwords
+// 3. "Mail" + "Other (Custom name)" select karo → "Mentora" naam do
+// 4. Jo 16-character password mile woh MENTORA_SMTP_PASS mein daalo
+// 5. MENTORA_SMTP_USER mein apna Gmail address daalo
+// =============================================
+define('MENTORA_SMTP_HOST', 'smtp.gmail.com');
+define('MENTORA_SMTP_PORT', 587);
+define('MENTORA_SMTP_USER', 'admin@mentorabridge.com'); // ← apna Gmail yahan
+define('MENTORA_SMTP_PASS', 'APNI_APP_PASSWORD_YAHAN'); // ← 16-char App Password yahan
+
+// =============================================
+// PHPMAILER SMTP OVERRIDE
+// WordPress ke default wp_mail ko SMTP se replace karo
+// =============================================
+add_action('phpmailer_init', function($phpmailer) {
+    $phpmailer->isSMTP();
+    $phpmailer->Host       = MENTORA_SMTP_HOST;
+    $phpmailer->SMTPAuth   = true;
+    $phpmailer->Port       = MENTORA_SMTP_PORT;
+    $phpmailer->Username   = MENTORA_SMTP_USER;
+    $phpmailer->Password   = MENTORA_SMTP_PASS;
+    $phpmailer->SMTPSecure = 'tls';
+    $phpmailer->From       = MENTORA_FROM_EMAIL;
+    $phpmailer->FromName   = MENTORA_FROM_NAME;
+});
 
 // =============================================
 // CORS — portal domain ko allow karo
@@ -86,8 +117,11 @@ function mentora_get_test_labels() {
 
 // =============================================
 // 1. ORDER COMPLETE → SEND TEST LINK EMAIL
+//    Dono hooks: processing + completed
+//    (processing = payment done, completed = manually marked)
 // =============================================
-add_action('woocommerce_order_status_completed', 'mentora_send_test_link', 10, 1);
+add_action('woocommerce_order_status_processing', 'mentora_send_test_link', 10, 1);
+add_action('woocommerce_order_status_completed',  'mentora_send_test_link', 10, 1);
 
 function mentora_send_test_link($order_id) {
     $order = wc_get_order($order_id);
@@ -135,7 +169,27 @@ function mentora_send_test_link($order_id) {
 }
 
 // =============================================
-// 2. REST: RESEND TEST LINK (manual trigger)
+// 2. REST: TEST EMAIL — SMTP check karo
+//    GET /wp-json/mentora/v1/test-email?to=your@email.com
+// =============================================
+add_action('rest_api_init', function () {
+    register_rest_route('mentora/v1', '/test-email', [
+        'methods'             => 'GET',
+        'callback'            => function(WP_REST_Request $request) {
+            $to   = sanitize_email($request->get_param('to') ?? MENTORA_ADMIN_EMAIL);
+            $sent = mentora_send_email($to, 'Mentora SMTP Test', '<p>SMTP is working! ✅</p>');
+            return new WP_REST_Response([
+                'success' => $sent,
+                'to'      => $to,
+                'message' => $sent ? 'Email sent successfully' : 'Email FAILED — check error_log',
+            ], $sent ? 200 : 500);
+        },
+        'permission_callback' => '__return_true',
+    ]);
+});
+
+// =============================================
+// 3. REST: RESEND TEST LINK (manual trigger)
 //    POST /wp-json/mentora/v1/resend-link
 //    Body: { "orderId": 1234 }
 // =============================================

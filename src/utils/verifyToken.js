@@ -63,8 +63,12 @@ export async function verifyToken(token, type) {
 
     const order = await response.json()
 
-    // 1. Check order status — must be completed
-    if (order.status !== 'completed') {
+    // 1. Check order status
+    // 'completed' aur 'processing' dono valid hain —
+    // processing = payment successful, WooCommerce ne abhi completed mark nahi kiya
+    // failed / cancelled / refunded = invalid
+    const validStatuses = ['completed', 'processing']
+    if (!validStatuses.includes(order.status)) {
       return { valid: false, reason: 'invalid' }
     }
 
@@ -74,9 +78,10 @@ export async function verifyToken(token, type) {
       return { valid: false, reason: 'invalid' }
     }
 
-    // 3. Check expiry — 7 days from order completion
-    const completedDate = new Date(order.date_completed || order.date_created)
-    const expiryDate = new Date(completedDate.getTime() + 7 * 24 * 60 * 60 * 1000)
+    // 3. Check expiry — 7 days from order date
+    // date_completed null ho sakta hai agar order abhi processing mein hai
+    const baseDate = new Date(order.date_completed || order.date_modified || order.date_created)
+    const expiryDate = new Date(baseDate.getTime() + 7 * 24 * 60 * 60 * 1000)
     if (new Date() > expiryDate) {
       return { valid: false, reason: 'expired' }
     }
