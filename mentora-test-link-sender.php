@@ -182,6 +182,38 @@ add_action('rest_api_init', function () {
 });
 
 // =============================================
+// RESEND VIA GET — browser se directly call karo
+// GET /wp-json/mentora/v1/resend?order=1234
+// =============================================
+add_action('rest_api_init', function () {
+    register_rest_route('mentora/v1', '/resend', [
+        'methods'             => 'GET',
+        'callback'            => function(WP_REST_Request $request) {
+            $order_id = intval($request->get_param('order'));
+            if (!$order_id) {
+                return new WP_REST_Response(['success' => false, 'error' => 'order param required'], 400);
+            }
+            $order = wc_get_order($order_id);
+            if (!$order) {
+                return new WP_REST_Response(['success' => false, 'error' => 'Order not found'], 404);
+            }
+            // Sent flag clear karo
+            $order->update_meta_data('_mentora_link_sent', 'no');
+            $order->save();
+            // Email bhejo
+            mentora_send_test_link($order_id);
+            return new WP_REST_Response([
+                'success'  => true,
+                'order_id' => $order_id,
+                'email'    => $order->get_billing_email(),
+                'message'  => 'Test link resent to ' . $order->get_billing_email(),
+            ], 200);
+        },
+        'permission_callback' => '__return_true',
+    ]);
+});
+
+// =============================================
 // 3. REST: RESEND TEST LINK (manual trigger)
 //    POST /wp-json/mentora/v1/resend-link
 //    Body: { "orderId": 1234 }
