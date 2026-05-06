@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) exit;
 define('MENTORA_ADMIN_EMAIL', 'support@mentorabridge.com');
 define('MENTORA_FROM_EMAIL',  'admin@mentorabridge.com');
 define('MENTORA_FROM_NAME',   'Mentora Bridge');
-define('MENTORA_PORTAL_URL',  'https://mentora-bridge.vercel.app');
+define('MENTORA_PORTAL_URL',  'https://mentorabridgepsychometric.com');
 
 // =============================================
 // CORS — portal domain ko allow karo
