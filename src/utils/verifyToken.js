@@ -68,9 +68,12 @@ export async function verifyToken(token, type) {
 
     const order = await response.json()
 
-    // 1. Order status check — processing + completed dono valid
-    const validStatuses = ['completed', 'processing']
-    if (!validStatuses.includes(order.status)) {
+    // 1. Order status check
+    // pending/on-hold/processing/completed sab valid hain —
+    // payment ho chuki hai, WooCommerce sirf status update mein time leta hai
+    // sirf failed/cancelled/refunded invalid hain
+    const invalidStatuses = ['failed', 'cancelled', 'refunded', 'trash']
+    if (invalidStatuses.includes(order.status)) {
       console.warn('Order status invalid:', order.status)
       return { valid: false, reason: 'invalid' }
     }
