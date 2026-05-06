@@ -110,10 +110,18 @@ add_action('woocommerce_order_status_completed',  'mentora_send_test_link', 10, 
 
 function mentora_send_test_link($order_id) {
     $order = wc_get_order($order_id);
-    if (!$order) return;
+    if (!$order) {
+        error_log("[Mentora] ORDER NOT FOUND: #$order_id");
+        return;
+    }
+
+    error_log("[Mentora] Hook fired for Order #$order_id | Status: " . $order->get_status());
 
     // Already sent check — prevent duplicate emails on re-trigger
-    if ($order->get_meta('_mentora_link_sent') === 'yes') return;
+    if ($order->get_meta('_mentora_link_sent') === 'yes') {
+        error_log("[Mentora] Already sent for Order #$order_id — skipping");
+        return;
+    }
 
     $product_test_map = mentora_get_product_test_map();
     $test_labels      = mentora_get_test_labels();
