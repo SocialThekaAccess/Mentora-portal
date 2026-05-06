@@ -1,33 +1,45 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { TESTS, TEST_LABELS } from '../data/testsData'
 import './TermsPage.css'
 
 export default function TermsPage() {
-  const navigate = useNavigate()
+  const navigate  = useNavigate()
+  const location  = useLocation()
   const [checked, setChecked] = useState({ c1: false, c2: false, c3: false })
 
+  // Session data teen jagah se try karo — jo bhi pehle mile
   const [session] = useState(() => {
+    // 1. React Router state — sabse reliable (VerifyPage ne directly pass kiya)
+    if (location.state?.session) {
+      return location.state.session
+    }
+    // 2. sessionStorage — backup
     try {
       const data = sessionStorage.getItem('mentora_session')
-      return data ? JSON.parse(data) : null
-    } catch {
-      return null
-    }
+      if (data) return JSON.parse(data)
+    } catch {}
+    // 3. Kuch nahi mila
+    return null
   })
 
-  // navigate ko render ke andar call karna safe nahi — useEffect mein karo
   useEffect(() => {
     if (!session) {
       navigate('/invalid', { replace: true })
+    } else {
+      // Router state se aaya toh sessionStorage mein bhi save karo
+      // taaki QuizPage bhi use kar sake
+      try {
+        sessionStorage.setItem('mentora_session', JSON.stringify(session))
+      } catch {}
     }
   }, [session, navigate])
 
   if (!session) return null
 
-  const test = TESTS[session.testType]
+  const test       = TESTS[session.testType]
   const allChecked = Object.values(checked).every(Boolean)
-  const totalQ = test?.sections?.reduce((sum, s) => sum + s.questions.length, 0) || 0
+  const totalQ     = test?.sections?.reduce((sum, s) => sum + s.questions.length, 0) || 0
 
   return (
     <div className="terms-page">
@@ -103,7 +115,7 @@ export default function TermsPage() {
         <button
           className={`start-btn ${allChecked ? 'active' : ''}`}
           disabled={!allChecked}
-          onClick={() => navigate('/test')}
+          onClick={() => navigate('/test', { state: { session } })}
         >
           Start Test →
         </button>

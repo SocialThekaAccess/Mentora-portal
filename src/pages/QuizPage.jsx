@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { TESTS } from '../data/testsData'
 import { submitResponses } from '../utils/submitResponses'
 import { markTokenUsed } from '../utils/verifyToken'
@@ -24,12 +24,14 @@ function formatTime(seconds) {
 
 export default function QuizPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const cardRef = useRef(null)
-  const submitRef = useRef(false) // double-submit guard
-  const tokenMarked = useRef(false) // guard: mark used only once
+  const submitRef = useRef(false)
+  const tokenMarked = useRef(false)
 
-  // Read session synchronously — same pattern as TermsPage
+  // Session: Router state → sessionStorage → null
   const [session] = useState(() => {
+    if (location.state?.session) return location.state.session
     try {
       const data = sessionStorage.getItem('mentora_session')
       return data ? JSON.parse(data) : null
@@ -38,38 +40,38 @@ export default function QuizPage() {
     }
   })
 
-  // Flatten questions synchronously from session
+  // Questions session se flatten karo
   const [allQuestions] = useState(() => {
-    try {
-      const data = sessionStorage.getItem('mentora_session')
-      if (!data) return []
-      const sess = JSON.parse(data)
-      const test = TESTS[sess.testType]
-      if (!test) return []
-      const flat = []
-      test.sections.forEach(section => {
-        section.questions.forEach(q => {
-          flat.push({ ...q, sectionId: section.id, sectionTitle: section.title, sectionInstruction: section.instruction })
-        })
+    const sess = location.state?.session || (() => {
+      try {
+        const data = sessionStorage.getItem('mentora_session')
+        return data ? JSON.parse(data) : null
+      } catch { return null }
+    })()
+    if (!sess) return []
+    const test = TESTS[sess.testType]
+    if (!test) return []
+    const flat = []
+    test.sections.forEach(section => {
+      section.questions.forEach(q => {
+        flat.push({ ...q, sectionId: section.id, sectionTitle: section.title, sectionInstruction: section.instruction })
       })
-      return flat
-    } catch {
-      return []
-    }
+    })
+    return flat
   })
 
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState({})
   const [submitting, setSubmitting] = useState(false)
   const [timeLeft, setTimeLeft] = useState(() => {
-    try {
-      const data = sessionStorage.getItem('mentora_session')
-      if (!data) return null
-      const sess = JSON.parse(data)
-      return (TEST_DURATION[sess.testType] || 40) * 60
-    } catch {
-      return null
-    }
+    const sess = location.state?.session || (() => {
+      try {
+        const data = sessionStorage.getItem('mentora_session')
+        return data ? JSON.parse(data) : null
+      } catch { return null }
+    })()
+    if (!sess) return null
+    return (TEST_DURATION[sess.testType] || 40) * 60
   })
 
   useEffect(() => {
