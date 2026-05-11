@@ -29,8 +29,8 @@ export default function QuizPage() {
   const submitRef = useRef(false)
   const tokenMarked = useRef(false)
 
-  // Session: Router state → sessionStorage → null
-  const [session] = useState(() => {
+  // Session ek jagah se lo — sab kuch yahan resolve karo
+  const getSession = () => {
     if (location.state?.session) return location.state.session
     try {
       const data = sessionStorage.getItem('mentora_session')
@@ -38,23 +38,25 @@ export default function QuizPage() {
     } catch {
       return null
     }
-  })
+  }
 
-  // Questions session se flatten karo
+  const [session] = useState(getSession)
+
+  // Questions flatten karo
   const [allQuestions] = useState(() => {
-    const sess = location.state?.session || (() => {
-      try {
-        const data = sessionStorage.getItem('mentora_session')
-        return data ? JSON.parse(data) : null
-      } catch { return null }
-    })()
+    const sess = getSession()
     if (!sess) return []
     const test = TESTS[sess.testType]
     if (!test) return []
     const flat = []
     test.sections.forEach(section => {
       section.questions.forEach(q => {
-        flat.push({ ...q, sectionId: section.id, sectionTitle: section.title, sectionInstruction: section.instruction })
+        flat.push({
+          ...q,
+          sectionId: section.id,
+          sectionTitle: section.title,
+          sectionInstruction: section.instruction,
+        })
       })
     })
     return flat
@@ -64,31 +66,21 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState({})
   const [submitting, setSubmitting] = useState(false)
   const [timeLeft, setTimeLeft] = useState(() => {
-    const sess = location.state?.session || (() => {
-      try {
-        const data = sessionStorage.getItem('mentora_session')
-        return data ? JSON.parse(data) : null
-      } catch { return null }
-    })()
+    const sess = getSession()
     if (!sess) return null
     return (TEST_DURATION[sess.testType] || 40) * 60
   })
 
   useEffect(() => {
-    // Redirect if no valid session — small delay taaki React state settle ho
-    const timer = setTimeout(() => {
-      if (!session || allQuestions.length === 0) {
-        navigate('/invalid', { replace: true })
-        return
-      }
-      // Mark token used once — fires after first real mount
-      if (!tokenMarked.current) {
-        tokenMarked.current = true
-        markTokenUsed(session.orderId)
-      }
-    }, 100)
-    return () => clearTimeout(timer)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    if (!session || allQuestions.length === 0) {
+      navigate('/invalid', { replace: true })
+      return
+    }
+    if (!tokenMarked.current) {
+      tokenMarked.current = true
+      markTokenUsed(session.orderId)
+    }
+  }, [session, allQuestions.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Timer countdown
   useEffect(() => {
@@ -103,7 +95,11 @@ export default function QuizPage() {
     return () => clearInterval(interval)
   }, [timeLeft])
 
-  if (!session || allQuestions.length === 0) return null
+  if (!session || allQuestions.length === 0) return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <p style={{ color: '#888' }}>Loading...</p>
+    </div>
+  )
 
   const total = allQuestions.length
   const current = allQuestions[currentIndex]
