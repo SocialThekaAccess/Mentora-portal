@@ -2310,6 +2310,18 @@ export const TESTS = {
   },
 }
 
+// =============================================
+// PHP plugin class-based keys ko age-based keys se map karo
+// WooCommerce type=class7-8 bhejta hai → TESTS['age13-14'] use hoga
+// =============================================
+TESTS['class7-8']           = TESTS['age13-14']
+TESTS['class9-10']          = TESTS['age14-15']
+TESTS['class11-12-science'] = TESTS['age15-16']
+TESTS['class11-12-commerce']= TESTS['age16-17']
+TESTS['class11-12-arts']    = TESTS['age17-18']
+TESTS['graduate']           = TESTS['age18-22']
+TESTS['professional']       = TESTS['age23plus']
+
 // Test type se display name
 export const TEST_LABELS = {
   'age13-14': 'Age 13–14 | Class 7–8',
@@ -2356,7 +2368,7 @@ export const TERMS_DATA = {
       "Be honest and spontaneous - don't overthink",
       'Select the answer that feels most natural to you',
     ],
-    guidelines: [
+    ImportantGuidelines: [
       'Attempt the test in one sitting',
       'Avoid distractions (mobile, TV, conversations)',
       'Do not skip questions',
@@ -2398,6 +2410,8 @@ export const TERMS_DATA = {
     ],
     duration: '30-40 minutes',
     totalQuestions: 42,
+    DifficultyLevel: 'Moderate(reflective, not academic )',
+    Outcome: 'Clarity & awareness (not a final decision',
     modules: [
       { id: 'A', focus: 'Personality & Decision Style' },
       { id: 'B', focus: 'Cognitive Strengths' },
@@ -2406,6 +2420,7 @@ export const TERMS_DATA = {
       { id: 'E', focus: 'Learning Style & Work Preference' },
       { id: 'F', focus: 'Emotional Intelligence' },
     ],
+    
     howToAnswer: [
       'Read each question carefully',
       'Choose the option that best reflects you',
@@ -2413,7 +2428,7 @@ export const TERMS_DATA = {
       'Be honest and spontaneous',
       'Select what is true for you now, not what others expect',
     ],
-    guidelines: [
+    ImportantGuidelines: [
       'Attempt the test in one sitting',
       'Link will be valid for 7 days',
       'Test link cannot be opened multiple times - decide your slot and then attempt',
@@ -2433,6 +2448,9 @@ export const TERMS_DATA = {
       'Insights into learning style & emotional readiness',
       'Optional 1:1 counselling session',
     ],
+
+    note: ['You can book your 1:1 counselling session , choose your preferred package'],
+
     counsellingLink: 'https://mentorabridge.com/career-counselling-services-chandigarh/',
     forParents: "Understand their child's true potential beyond marks, support right stream selection decisions, reduce confusion and stress, and align decisions with long-term career pathways.",
     whoShouldTake: [],
@@ -2492,6 +2510,9 @@ export const TERMS_DATA = {
       'Long-term academic planning guidance',
       'Optional 1:1 expert counselling session',
     ],
+
+    note: ['You can book your 1:1 counselling session , choose your preferred package'],
+
     counsellingLink: 'https://mentorabridge.com/career-counselling-services-chandigarh/',
     forParents: "Make informed stream decisions, understand their child's true potential beyond marks, reduce confusion and pressure, and align decisions with long-term career success.",
     whoShouldTake: [],
@@ -2552,6 +2573,9 @@ export const TERMS_DATA = {
       'Suggestions for internships, projects & profile building',
       'Optional 1:1 expert counselling session',
     ],
+
+    note: ['You can book your 1:1 counselling session , choose your preferred package'],
+
     counsellingLink: 'https://mentorabridge.com/career-counselling-services-chandigarh/',
     forParents: "Avoid random or trend-based course selection, understand their child's true direction & readiness, support strategic career planning, and align decisions with long-term success & satisfaction.",
     whoShouldTake: [],
@@ -2614,6 +2638,9 @@ export const TERMS_DATA = {
       '3-5 year career & academic roadmap',
       'Optional 1:1 expert counselling session',
     ],
+
+    note: ['You can book your 1:1 counselling session , choose your preferred package'],
+
     counsellingLink: 'https://mentorabridge.com/career-counselling-services-chandigarh/',
     forParents: "Support final, informed career decisions, avoid misaligned college/course choices, understand child's readiness & independence level, and align investments with long-term success.",
     whoShouldTake: [],
@@ -2675,6 +2702,9 @@ export const TERMS_DATA = {
       'India vs Study Abroad Direction (if applicable)',
       '2-5 Year Career Roadmap with Action Steps',
     ],
+
+    note: ['You can book your 1:1 counselling session , choose your preferred package'],
+
     counsellingLink: 'https://mentorabridge.com/career-counselling-services-chandigarh/',
     forParents: "Understand their child's career direction & readiness, support decisions beyond traditional degree thinking, avoid misaligned investments in courses or higher studies, and enable structured and strategic career planning.",
     whoShouldTake: [],
@@ -2737,6 +2767,9 @@ export const TERMS_DATA = {
       'Higher Studies / Executive Education Guidance (if applicable)',
       '2-5 Year Career Roadmap with Action Steps',
     ],
+
+    note: ['You can book your 1:1 counselling session , choose your preferred package'],
+
     counsellingLink: 'https://mentorabridge.com/career-counselling-services-chandigarh/',
     forParents: '',
     whoShouldTake: [
