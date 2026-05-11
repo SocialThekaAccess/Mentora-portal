@@ -75,16 +75,19 @@ export default function QuizPage() {
   })
 
   useEffect(() => {
-    // Redirect if no valid session
-    if (!session || allQuestions.length === 0) {
-      navigate('/invalid', { replace: true })
-      return
-    }
-    // Mark token used once — fires after first real mount
-    if (!tokenMarked.current) {
-      tokenMarked.current = true
-      markTokenUsed(session.orderId)
-    }
+    // Redirect if no valid session — small delay taaki React state settle ho
+    const timer = setTimeout(() => {
+      if (!session || allQuestions.length === 0) {
+        navigate('/invalid', { replace: true })
+        return
+      }
+      // Mark token used once — fires after first real mount
+      if (!tokenMarked.current) {
+        tokenMarked.current = true
+        markTokenUsed(session.orderId)
+      }
+    }, 100)
+    return () => clearTimeout(timer)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Timer countdown
