@@ -29,6 +29,7 @@ export default function TermsPage() {
     } else {
       try {
         sessionStorage.setItem('mentora_session', JSON.stringify(session))
+        localStorage.setItem('mentora_session', JSON.stringify(session))
       } catch {}
     }
   }, [session, navigate])

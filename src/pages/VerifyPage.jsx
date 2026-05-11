@@ -36,6 +36,7 @@ export default function VerifyPage() {
           }
           try {
             sessionStorage.setItem('mentora_session', JSON.stringify(sessionData))
+            localStorage.setItem('mentora_session', JSON.stringify(sessionData))
           } catch {}
 
           navigate('/terms', { replace: true, state: { session: sessionData } })

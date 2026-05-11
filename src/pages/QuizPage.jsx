@@ -33,11 +33,14 @@ export default function QuizPage() {
   const getSession = () => {
     if (location.state?.session) return location.state.session
     try {
-      const data = sessionStorage.getItem('mentora_session')
-      return data ? JSON.parse(data) : null
-    } catch {
-      return null
-    }
+      const s = sessionStorage.getItem('mentora_session')
+      if (s) return JSON.parse(s)
+    } catch {}
+    try {
+      const l = localStorage.getItem('mentora_session')
+      if (l) return JSON.parse(l)
+    } catch {}
+    return null
   }
 
   const [session] = useState(getSession)
@@ -151,6 +154,7 @@ export default function QuizPage() {
       questions: allQuestions,
     })
     sessionStorage.removeItem('mentora_session')
+    localStorage.removeItem('mentora_session')
     navigate('/result', { replace: true, state: { success: result.success, customerName: session.customerName } })
   }
 
