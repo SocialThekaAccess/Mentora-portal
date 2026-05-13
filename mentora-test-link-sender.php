@@ -78,25 +78,25 @@ add_action('wp_mail_failed', function($error) {
 // =============================================
 function mentora_get_product_test_map() {
     return [
-        3999 => 'class7-8',
-        3998 => 'class9-10',
-        4310 => 'class9-10',
-        4314 => 'class11-12-science',
-        4315 => 'class11-12-commerce',
-        4316 => 'graduate',
-        4317 => 'professional',
+        3999 => 'age13-14',
+        3998 => 'age14-15',
+        4310 => 'age15-16',
+        4314 => 'age16-17',
+        4315 => 'age17-18',
+        4316 => 'age18-22',
+        4317 => 'age23plus',
     ];
 }
 
 function mentora_get_test_labels() {
     return [
-        'class7-8'            => 'Class 7–8 Career Aptitude Test',
-        'class9-10'           => 'Class 9–10 Career Aptitude Test',
-        'class11-12-science'  => 'Class 11–12 Science Career Aptitude Test',
-        'class11-12-commerce' => 'Class 11–12 Commerce Career Aptitude Test',
-        'class11-12-arts'     => 'Class 11–12 Arts Career Aptitude Test',
-        'graduate'            => 'Graduate Career Clarity Assessment',
-        'professional'        => 'Professional Career Transition Assessment',
+        'age13-14'  => 'Age 13–14 | Class 7–8 Career Aptitude Test',
+        'age14-15'  => 'Age 14–15 | Class 9–10 Career Aptitude Test',
+        'age15-16'  => 'Age 15–16 | Class 10 Career Direction Test',
+        'age16-17'  => 'Age 16–17 | Class 11–12 Career Aptitude Test',
+        'age17-18'  => 'Age 17–18 | Class 12 Career Decision Test',
+        'age18-22'  => 'Age 18–22 | Graduate Career Roadmap Assessment',
+        'age23plus' => 'Age 23+ | Professional Career Transition Assessment',
     ];
 }
 

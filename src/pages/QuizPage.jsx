@@ -6,7 +6,16 @@ import { markTokenUsed } from '../utils/verifyToken'
 import './QuizPage.css'
 
 // WooCommerce testType → testsData.js key mapping
+// testType ab directly age-based keys hain — direct match
 const TEST_TYPE_MAP = {
+  'age13-14':  'age13-14',
+  'age14-15':  'age14-15',
+  'age15-16':  'age15-16',
+  'age16-17':  'age16-17',
+  'age17-18':  'age17-18',
+  'age18-22':  'age18-22',
+  'age23plus': 'age23plus',
+  // Legacy keys (purane orders ke liye fallback)
   'class7-8':            'age13-14',
   'class9-10':           'age14-15',
   'class11-12-science':  'age16-17',
