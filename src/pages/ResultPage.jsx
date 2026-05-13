@@ -23,7 +23,9 @@ export default function ResultPage() {
               <ul>
                 <li>📧 You will receive a confirmation email shortly.</li>
                 <li>📊 Our team will analyze your responses.</li>
-                <li>📞 A counselor will reach out to you within 3–5 business days.</li>
+                <li>📞 A counselor will reach out to you within 24 hours .</li>
+                <li>🧠 Your psychometric test results will be shared within 3–5 working days.
+</li>
               </ul>
             </div>
           </>
