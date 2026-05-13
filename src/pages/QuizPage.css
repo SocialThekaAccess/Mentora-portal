@@ -57,16 +57,19 @@
 }
 
 .quiz-timer {
-  background: rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.9);
-  font-size: 0.9rem;
-  font-weight: 700;
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 800;
   font-family: 'DM Sans', monospace;
-  padding: 0.3rem 0.85rem;
-  border-radius: 8px;
+  padding: 0.45rem 1.1rem;
+  border-radius: 10px;
   flex-shrink: 0;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  border: 2px solid rgba(255,255,255,0.5);
   transition: background 0.3s, color 0.3s;
+  min-width: 90px;
+  text-align: center;
 }
 
 .quiz-timer.timer-warning {
