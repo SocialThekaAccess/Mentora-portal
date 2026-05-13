@@ -2782,3 +2782,16 @@ export const TERMS_DATA = {
     finalNote: 'This is not just about changing jobs - it is about designing your next level of career, income, and life direction.',
   },
 }
+
+// =============================================
+// TERMS_DATA age-based key aliases
+// testType ab age-based hai (age13-14, age14-15 etc.)
+// yeh aliases ensure karte hain ke TermsPage sahi data load kare
+// =============================================
+TERMS_DATA['age13-14']  = TERMS_DATA['class7-8']
+TERMS_DATA['age14-15']  = TERMS_DATA['class9-10']
+TERMS_DATA['age15-16']  = TERMS_DATA['class11-12-science']
+TERMS_DATA['age16-17']  = TERMS_DATA['class11-12-commerce']
+TERMS_DATA['age17-18']  = TERMS_DATA['class11-12-arts']
+TERMS_DATA['age18-22']  = TERMS_DATA['graduate']
+TERMS_DATA['age23plus'] = TERMS_DATA['professional']
