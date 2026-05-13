@@ -226,7 +226,7 @@ export const TESTS = {
       {
         id: 'E',
         title: 'Module E — Self-Awareness & Mindset',
-        instruction: 'Rate each statement (1 = Not true, 5 = Very 
+        instruction: 'Rate each statement (1 = Not true, 5 = Very true)',
         questions: [
           { id: 31, text: 'I believe I have unique strengths', type: 'rating' },
           { id: 32, text: 'I enjoy learning new things', type: 'rating' },
