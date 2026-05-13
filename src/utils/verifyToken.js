@@ -78,11 +78,16 @@ export async function verifyToken(token, type) {
       return { valid: false, reason: 'invalid' }
     }
 
-    // 2. Test type match check
+    // 2. Test type match check — order mein saved type se verify karo
     const orderType = order.meta_data?.find(m => m.key === '_mentora_test_type')?.value
     if (orderType && orderType !== type) {
+      // URL ka type aur order ka actual type match nahi — wrong test link
+      console.warn(`Type mismatch: URL type="${type}", order type="${orderType}"`)
       return { valid: false, reason: 'invalid' }
     }
+
+    // Agar orderType missing hai toh URL type use karo (purane orders ke liye)
+    const resolvedType = orderType || type
 
     // 3. Expiry check — 7 days
     const baseDate   = new Date(order.date_completed || order.date_modified || order.date_created)
@@ -102,7 +107,7 @@ export async function verifyToken(token, type) {
       orderId:       order.id,
       customerName:  `${order.billing.first_name} ${order.billing.last_name}`,
       customerEmail: order.billing.email,
-      testType:      type,
+      testType:      resolvedType, // Order ka actual type ya URL type
     }
   } catch (err) {
     console.error('Token verify error after retries:', err)

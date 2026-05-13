@@ -5,6 +5,17 @@ import { submitResponses } from '../utils/submitResponses'
 import { markTokenUsed } from '../utils/verifyToken'
 import './QuizPage.css'
 
+// WooCommerce testType → testsData.js key mapping
+const TEST_TYPE_MAP = {
+  'class7-8':            'age13-14',
+  'class9-10':           'age14-15',
+  'class11-12-science':  'age16-17',
+  'class11-12-commerce': 'age16-17',
+  'class11-12-arts':     'age16-17',
+  'graduate':            'age18-22',
+  'professional':        'age23plus',
+}
+
 // Har test ke liye time (minutes mein)
 const TEST_DURATION = {
   'class7-8': 30,
@@ -49,7 +60,8 @@ export default function QuizPage() {
   const [allQuestions] = useState(() => {
     const sess = getSession()
     if (!sess) return []
-    const test = TESTS[sess.testType]
+    const mappedKey = TEST_TYPE_MAP[sess.testType] || sess.testType
+    const test = TESTS[mappedKey]
     if (!test) return []
     const flat = []
     test.sections.forEach(section => {
